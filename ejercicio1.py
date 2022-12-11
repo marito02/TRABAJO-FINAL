@@ -1,88 +1,45 @@
-def get_valid_pos(position: tuple[int, int], n: int) -> list[tuple[int, int]]:
-    """
-    Find all the valid positions a knight can move to from the current position.
-    >>> get_valid_pos((1, 3), 4)
-    [(2, 1), (0, 1), (3, 2)]
-    """
+TableroAjedrez = [[1,2,3],[4,5,6], [7,8,9], [None, 0, None]]
 
-    y, x = position
-    positions = [
-        (y + 1, x + 2),
-        (y - 1, x + 2),
-        (y + 1, x - 2),
-        (y - 1, x - 2),
-        (y + 2, x + 1),
-        (y + 2, x - 1),
-        (y - 2, x + 1),
-        (y - 2, x - 1),
-    ]
-    permissible_positions = []
+def countMatrizElements(matriz):
+ contador = 0
+ for fila in range(len(matriz)):
+  for columna in range (len(matriz[fila])):
+      if matriz[fila][columna] != None:
+          contador = contador + 1
+ return contador
 
-    for position in positions:
-        y_test, x_test = position
-        if 0 <= y_test < n and 0 <= x_test < n:
-            permissible_positions.append(position)
+def horseValidMovementsAux(tablero, movimientos, inicio):
+    if movimientos == 0:
+        return 0
+    for fila in range(len(tablero)):
+        for columna in range (len(tablero[fila])):
+            if(tablero[fila][columna] == inicio):
+                if(fila==0 and columna == 0):
+                   return 2+horseValidMovementsAux(tablero,movimientos-1,tablero[fila+1][columna+2])+horseValidMovementsAux(tablero,movimientos-1,tablero[fila+2][columna+1])
+                elif(fila==1 and columna == 0):
+                    return 3+horseValidMovementsAux(tablero,movimientos-1,tablero[fila+1][columna+2])+horseValidMovementsAux(tablero,movimientos-1,tablero[fila-1][columna+2])+horseValidMovementsAux(tablero,movimientos-1,tablero[fila+2][columna+1])
+                elif(fila==2 and columna == 0):
+                    return 2+horseValidMovementsAux(tablero,movimientos-1,tablero[fila-1][columna+2])+horseValidMovementsAux(tablero,movimientos-1,tablero[fila-2][columna+1])
+                elif(fila== 3 and columna == 1):
+                    return 2+horseValidMovementsAux(tablero,movimientos-1,tablero[fila-2][columna+1])+horseValidMovementsAux(tablero,movimientos-1,tablero[fila-2][columna-1])
+                elif(fila==0 and columna == 1):
+                   return 2+horseValidMovementsAux(tablero,movimientos-1,tablero[fila+2][columna+1])+horseValidMovementsAux(tablero,movimientos-1,tablero[fila+2][columna-1])
+                elif(fila==1 and columna == 1):
+                    return 0
+                elif(fila==2 and columna == 1):
+                    return 2+horseValidMovementsAux(tablero,movimientos-1,tablero[fila-2][columna+1])+horseValidMovementsAux(tablero,movimientos-1,tablero[fila-2][columna-1])
+                elif(fila==0 and columna == 2):
+                   return 2+horseValidMovementsAux(tablero,movimientos-1,tablero[fila+2][columna-1])+horseValidMovementsAux(tablero,movimientos-1,tablero[fila+1][columna-2])
+                elif(fila==1 and columna == 2):
+                    return 3+horseValidMovementsAux(tablero,movimientos-1,tablero[fila+2][columna-1])+horseValidMovementsAux(tablero,movimientos-1,tablero[fila-1][columna-2])+horseValidMovementsAux(tablero,movimientos-1,tablero[fila+1][columna-2])
+                elif(fila==2 and columna == 2):
+                    return 2+horseValidMovementsAux(tablero,movimientos-1,tablero[fila-2][columna-1])+horseValidMovementsAux(tablero,movimientos-1,tablero[fila-1][columna-2])
+                                
 
-    return permissible_positions
+def horseValidMovements(tablero, movimientos):
+ contadormovimientos = 0
+ for inicio in range(countMatrizElements(tablero)):
+   contadormovimientos = contadormovimientos + horseValidMovementsAux(tablero, movimientos, inicio)
+ return contadormovimientos
 
-
-def is_complete(board: list[list[int]]) -> bool:
-    """
-    Check if the board (matrix) has been completely filled with non-zero values.
-    >>> is_complete([[1]])
-    True
-    >>> is_complete([[1, 2], [3, 0]])
-    False
-    """
-
-    return not any(elem == 0 for row in board for elem in row)
-
-
-def open_knight_tour_helper(
-    board: list[list[int]], pos: tuple[int, int], curr: int
-) -> bool:
-    """
-    Helper function to solve knight tour problem.
-    """
-
-    if is_complete(board):
-        return True
-
-    for position in get_valid_pos(pos, len(board)):
-        y, x = position
-
-        if board[y][x] == 0:
-            board[y][x] = curr + 1
-            if open_knight_tour_helper(board, position, curr + 1):
-                return True
-            board[y][x] = 0
-
-    return False
-
-
-def open_knight_tour(n: int) -> list[list[int]]:
-    """
-    Find the solution for the knight tour problem for a board of size n. Raises
-    ValueError if the tour cannot be performed for the given size.
-    >>> open_knight_tour(1)
-    [[1]]
-    >>> open_knight_tour(2)
-    Traceback (most recent call last):
-        ...
-    ValueError: Open Kight Tour cannot be performed on a board of size 2
-    """
-
-    board = [[0 for i in range(n)] for j in range(n)]
-
-    for i in range(n):
-        for j in range(n):
-            board[i][j] = 1
-            if open_knight_tour_helper(board, (i, j), 1):
-                return board
-            board[i][j] = 0
-
-    raise ValueError(f"Open Kight Tour cannot be performed on a board of size {n}")
-
-
-print(get_valid_pos((1,3),4))
-print(is_complete([[1]]))
+print(horseValidMovements(TableroAjedrez, 1))
